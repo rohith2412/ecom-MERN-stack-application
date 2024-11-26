@@ -1,51 +1,47 @@
-const express = require('express');
-const router = express.Router();
-const userModel = require('../models/userModel');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const cookieParser = require('cookie-parser');
-require('dotenv').config();
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const userModel = require("../models/userModel");
+require("dotenv").config();
 
-// Use cookie-parser middleware
-router.use(cookieParser());
+const router = express.Router();
 
 router.post("/login", async (req, res) => {
-    let { email, password } = req.body;
-  
-    // Validate input
+    const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.json("Email and password are required");
+        return res.status(400).json({ message: "Email and password are required" });
     }
-  
+
     try {
         const user = await userModel.findOne({ email });
         if (!user) {
-          return res.json("Invalid email");
+            return res.status(400).json({ message: "Invalid email" });
         }
 
-        // Compare hashed password with entered password
-        bcrypt.compare(password, user.password, (err, result) => {
-            if (err) {
-                return res.status(500).json({ error: "Internal server error" });
-            }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "Incorrect password" });
+        }
 
-            if (result) {
-                // Create JWT token with correct payload
-                const token = jwt.sign(
-                    { id: user._id, email: user.email }, 
-                    process.env.JWT_KEY, 
-                    { expiresIn: '1h' }
-                );
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            process.env.JWT_KEY,
+            { expiresIn: "1h" }
+        );
 
-                // Send token as cookie
-                res.cookie("token", token, { httpOnly: true });  // Added httpOnly for better security
-                return res.json("Login successful");
-            } else {
-                return res.json("Incorrect password");
-            }
+        // Set HTTP-only token cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
+
+        return res.status(200).json({ message: "Login successful" });
     } catch (err) {
-        return res.status(500).json({ error: "Internal server error" });
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
     }
 });
 
