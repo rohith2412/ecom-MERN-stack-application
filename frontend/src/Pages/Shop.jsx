@@ -11,7 +11,7 @@ const Shop = () => {
         const response = await axios.get(
           "http://localhost:2000/api/v1/user/shop"
         );
-        setProducts(response.data); // Store products in state
+        setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -42,7 +42,7 @@ const Shop = () => {
               <p className="text-lg text-center text-gray-700 mb-4">
                 ${product.product.price}
               </p>
-              <button className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">
+              <button className="w-full py-2 bg-black text-white rounded-md hover:bg-black transition duration-300">
                 Add to Cart
               </button>
             </div>

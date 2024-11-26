@@ -10,8 +10,10 @@ const adminSignup = require('./routes/adminSignup');
 const adminLogin = require('./routes/adminLogin');
 const adminPanel = require('./routes/adminPanel')
 const shop = require('./routes/shop');
+const cookieParser = require("cookie-parser");
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 
 app.use("/api/v1/user", userSignup);       

@@ -22,7 +22,7 @@ const Login = () => {
       })
       .then((result) => {
         console.log(result);
-        if (result.data === "login succesfull") {
+        if (result.data === "Login successful") {
           navigate("/");
         } else {
           alert(result.data);
